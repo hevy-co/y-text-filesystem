@@ -1,5 +1,5 @@
 
-import * as indexeddb from './y-indexeddb.tests.js'
+import * as yFilesystem from './y-filesystem.tests.js'
 
 import { runTests } from 'lib0/testing.js'
 import { isBrowser, isNode } from 'lib0/environment.js'
@@ -9,7 +9,7 @@ if (isBrowser) {
   log.createVConsole(document.body)
 }
 runTests({
-  indexeddb
+  fs: yFilesystem
 }).then(success => {
   /* istanbul ignore next */
   if (isNode) {

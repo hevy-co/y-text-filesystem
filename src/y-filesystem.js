@@ -9,31 +9,31 @@ const updatesStoreName = 'updates'
 export const PREFERRED_TRIM_SIZE = 500
 
 /**
- * @param {IndexeddbPersistence} idbPersistence
+ * @param {FilesystemPersistence} fsPersistence
  */
-export const fetchUpdates = idbPersistence => {
-  const [updatesStore] = idb.transact(/** @type {IDBDatabase} */ (idbPersistence.db), [updatesStoreName]) // , 'readonly')
-  return idb.getAll(updatesStore, idb.createIDBKeyRangeLowerBound(idbPersistence._dbref, false)).then(updates =>
-    idbPersistence._mux(() =>
-      updates.forEach(val => Y.applyUpdate(idbPersistence.doc, val))
+export const fetchUpdates = fsPersistence => {
+  const [updatesStore] = idb.transact(/** @type {IDBDatabase} */(fsPersistence.db), [updatesStoreName]) // , 'readonly')
+  return idb.getAll(updatesStore, idb.createIDBKeyRangeLowerBound(fsPersistence._dbref, false)).then(updates =>
+    fsPersistence._mux(() =>
+      updates.forEach(val => Y.applyUpdate(fsPersistence.doc, val))
     )
   )
-    .then(() => idb.getLastKey(updatesStore).then(lastKey => { idbPersistence._dbref = lastKey + 1 }))
-    .then(() => idb.count(updatesStore).then(cnt => { idbPersistence._dbsize = cnt }))
+    .then(() => idb.getLastKey(updatesStore).then(lastKey => { fsPersistence._dbref = lastKey + 1 }))
+    .then(() => idb.count(updatesStore).then(cnt => { fsPersistence._dbsize = cnt }))
     .then(() => updatesStore)
 }
 
 /**
- * @param {IndexeddbPersistence} idbPersistence
+ * @param {FilesystemPersistence} fsPersistence
  * @param {boolean} forceStore
  */
-export const storeState = (idbPersistence, forceStore = true) =>
-  fetchUpdates(idbPersistence)
+export const storeState = (fsPersistence, forceStore = true) =>
+  fetchUpdates(fsPersistence)
     .then(updatesStore => {
-      if (forceStore || idbPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
-        idb.addAutoKey(updatesStore, Y.encodeStateAsUpdate(idbPersistence.doc))
-          .then(() => idb.del(updatesStore, idb.createIDBKeyRangeUpperBound(idbPersistence._dbref, true)))
-          .then(() => idb.count(updatesStore).then(cnt => { idbPersistence._dbsize = cnt }))
+      if (forceStore || fsPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
+        idb.addAutoKey(updatesStore, Y.encodeStateAsUpdate(fsPersistence.doc))
+          .then(() => idb.del(updatesStore, idb.createIDBKeyRangeUpperBound(fsPersistence._dbref, true)))
+          .then(() => idb.count(updatesStore).then(cnt => { fsPersistence._dbsize = cnt }))
       }
     })
 
@@ -45,7 +45,7 @@ export const clearDocument = name => idb.deleteDB(name)
 /**
  * @extends Observable<string>
  */
-export class IndexeddbPersistence extends Observable {
+export class FilesystemPersistence extends Observable {
   /**
    * @param {string} name
    * @param {Y.Doc} doc
@@ -69,7 +69,7 @@ export class IndexeddbPersistence extends Observable {
       ])
     )
     /**
-     * @type {Promise<IndexeddbPersistence>}
+     * @type {Promise<FilesystemPersistence>}
      */
     this.whenSynced = this._db.then(db => {
       this.db = db
@@ -94,7 +94,7 @@ export class IndexeddbPersistence extends Observable {
     this._storeUpdate = update =>
       this._mux(() => {
         if (this.db) {
-          const [updatesStore] = idb.transact(/** @type {IDBDatabase} */ (this.db), [updatesStoreName])
+          const [updatesStore] = idb.transact(/** @type {IDBDatabase} */(this.db), [updatesStoreName])
           idb.addAutoKey(updatesStore, update)
           if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
             // debounce store call
