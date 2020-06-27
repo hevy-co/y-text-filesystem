@@ -1,11 +1,11 @@
 {
-  "name": "y-indexeddb",
-  "version": "9.0.3",
-  "description": "IndexedDB database adapter for Yjs",
+  "name": "y-filesystem",
+  "version": "1.0.0",
+  "description": "Filesystem database adapter for Yjs",
   "type": "module",
-  "main": "./src/y-indexeddb.js",
-  "module": "./src/y-indexeddb.js",
-  "types": "./dist/src/y-indexeddb.d.ts",
+  "main": "./src/y-filesystem.js",
+  "module": "./src/y-filesystem.js",
+  "types": "./dist/src/y-filesystem.d.ts",
   "sideEffects": false,
   "scripts": {
     "clean": "rm -rf dist",
@@ -38,10 +38,10 @@
     "collaboration",
     "concurrency"
   ],
-  "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
+  "author": "Matthew Olenik <matt@hevy.co>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yjs/y-indexeddb/issues"
+    "url": "https://github.com/hevy-co/y-filesystem/issues"
   },
   "homepage": "https://yjs.dev",
   "dependencies": {
@@ -56,7 +56,7 @@
     "markdownlint-cli": "^0.19.0",
     "rollup": "^1.29.1",
     "standard": "^11.0.1",
-    "typescript": "^3.7.5",
+    "typescript": "^3.9.5",
     "y-protocols": "^0.2.0",
     "yjs": "^13.0.0"
   },
