@@ -1,19 +1,11 @@
-# IndexedDB database adapter for [Yjs](https://github.com/y-js/yjs)
+# Filesystem persistence adapter for [Yjs](https://github.com/y-js/yjs)
 
-Use the IndexedDB database adapter to store your shared data persistently in
-the browser. The next time you join the session, your changes will still be
-there.
+Use the filesystem adapter to persist data on a local filesystem.
 
-* Minimizes the amount of data exchanged between server and client
-* Makes offline editing possible
-* Not supported by all browsers (see [mdn](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API))
-
-## Use it
-
-Install this with bower or npm.
+Install this with `npm` or `yarn`.
 
 ```sh
-npm install y-indexeddb --save
+yarn add y-filesystem
 ```
 
 ## License
