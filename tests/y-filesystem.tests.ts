@@ -7,7 +7,7 @@ import * as promise from 'lib0/promise.js'
 /**
  * @param {t.TestCase} tc
  */
-export const testIdbUpdateAndMerge = async tc => {
+export const testIdbUpdateAndMerge = async (tc: any) => {
   await clearDocument(tc.testName)
   const doc1 = new Y.Doc()
   const arr1 = doc1.getArray('t')
@@ -34,7 +34,7 @@ export const testIdbUpdateAndMerge = async tc => {
 /**
  * @param {t.TestCase} tc
  */
-export const testIdbConcurrentMerge = async tc => {
+export const testIdbConcurrentMerge = async (tc: any) => {
   await clearDocument(tc.testName)
   const doc1 = new Y.Doc()
   const arr1 = doc1.getArray('t')

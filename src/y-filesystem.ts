@@ -11,8 +11,11 @@ export const PREFERRED_TRIM_SIZE = 500
 /**
  * @param {FilesystemPersistence} fsPersistence
  */
-export const fetchUpdates = fsPersistence => {
-  const [updatesStore] = idb.transact(/** @type {IDBDatabase} */(fsPersistence.db), [updatesStoreName]) // , 'readonly')
+export const fetchUpdates = (fsPersistence: FilesystemPersistence) => {
+  if (!fsPersistence.db) {
+    throw new Error("fsPersistence should not be null")
+  }
+  const [updatesStore] = idb.transact(/** @type {any} */(fsPersistence.db), [updatesStoreName]) // , 'readonly')
   return idb.getAll(updatesStore, idb.createIDBKeyRangeLowerBound(fsPersistence._dbref, false)).then(updates =>
     fsPersistence._mux(() =>
       updates.forEach(val => Y.applyUpdate(fsPersistence.doc, val))
@@ -27,7 +30,7 @@ export const fetchUpdates = fsPersistence => {
  * @param {FilesystemPersistence} fsPersistence
  * @param {boolean} forceStore
  */
-export const storeState = (fsPersistence, forceStore = true) =>
+export const storeState = (fsPersistence: FilesystemPersistence, forceStore: boolean = true) =>
   fetchUpdates(fsPersistence)
     .then(updatesStore => {
       if (forceStore || fsPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
@@ -40,17 +43,30 @@ export const storeState = (fsPersistence, forceStore = true) =>
 /**
  * @param {string} name
  */
-export const clearDocument = name => idb.deleteDB(name)
+export const clearDocument = (name: string) => { }
 
 /**
  * @extends Observable<string>
  */
-export class FilesystemPersistence extends Observable {
+export class FilesystemPersistence extends Observable<any> {
+  doc: Y.Doc
+  name: string
+  _mux: mutex.mutex
+  _dbref: number
+  _dbsize: number
+  _db: Promise<any>
+  db: any
+  synced: boolean
+  whenSynced: any
+  _storeTimeout: number
+  _storeTimeoutId: NodeJS.Timeout | null
+  _storeUpdate: (update: Uint8Array) => any
+
   /**
    * @param {string} name
    * @param {Y.Doc} doc
    */
-  constructor (name, doc) {
+  constructor(name: string, doc: Y.Doc) {
     super()
     this.doc = doc
     this.name = name
@@ -58,7 +74,7 @@ export class FilesystemPersistence extends Observable {
     this._dbref = 0
     this._dbsize = 0
     /**
-     * @type {IDBDatabase|null}
+     * @type {any|null}
      */
     this.db = null
     this.synced = false
@@ -71,7 +87,7 @@ export class FilesystemPersistence extends Observable {
     /**
      * @type {Promise<FilesystemPersistence>}
      */
-    this.whenSynced = this._db.then(db => {
+    this.whenSynced = this._db.then((db: any) => {
       this.db = db
       const currState = Y.encodeStateAsUpdate(doc)
       return fetchUpdates(this).then(updatesStore => idb.addAutoKey(updatesStore, currState)).then(() => {
@@ -91,10 +107,10 @@ export class FilesystemPersistence extends Observable {
     /**
      * @param {Uint8Array} update
      */
-    this._storeUpdate = update =>
+    this._storeUpdate = (update: Uint8Array) =>
       this._mux(() => {
         if (this.db) {
-          const [updatesStore] = idb.transact(/** @type {IDBDatabase} */(this.db), [updatesStoreName])
+          const [updatesStore] = idb.transact(/** @type {any} */(this.db), [updatesStoreName])
           idb.addAutoKey(updatesStore, update)
           if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
             // debounce store call
@@ -111,7 +127,7 @@ export class FilesystemPersistence extends Observable {
     doc.on('update', this._storeUpdate)
   }
 
-  destroy () {
+  destroy() {
     if (this._storeTimeoutId) {
       clearTimeout(this._storeTimeoutId)
     }
@@ -124,7 +140,7 @@ export class FilesystemPersistence extends Observable {
   /**
    * Destroys this instance and removes all data from indexeddb.
    */
-  clearData () {
+  clearData() {
     this.destroy().then(() => {
       idb.deleteDB(this.name)
     })
@@ -134,7 +150,7 @@ export class FilesystemPersistence extends Observable {
    * @param {String | number | ArrayBuffer | Date} key
    * @return {Promise<String | number | ArrayBuffer | Date | any>}
    */
-  get (key) {
+  get(key: string | number | ArrayBuffer | Date): Promise<string | number | ArrayBuffer | Date | any> {
     return this._db.then(db => {
       const [custom] = idb.transact(db, [customStoreName], 'readonly')
       return idb.get(custom, key)
@@ -146,7 +162,7 @@ export class FilesystemPersistence extends Observable {
    * @param {String | number | ArrayBuffer | Date} value
    * @return {Promise<String | number | ArrayBuffer | Date>}
    */
-  set (key, value) {
+  set(key: string | number | ArrayBuffer | Date, value: string | number | ArrayBuffer | Date): Promise<string | number | ArrayBuffer | Date> {
     return this._db.then(db => {
       const [custom] = idb.transact(db, [customStoreName])
       return idb.put(custom, key, value)
@@ -157,7 +173,7 @@ export class FilesystemPersistence extends Observable {
    * @param {String | number | ArrayBuffer | Date} key
    * @return {Promise<undefined>}
    */
-  del (key) {
+  del(key: string | number | ArrayBuffer | Date): Promise<undefined> {
     return this._db.then(db => {
       const [custom] = idb.transact(db, [customStoreName])
       return idb.del(custom, key)

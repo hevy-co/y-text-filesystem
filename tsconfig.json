@@ -1,17 +1,20 @@
 {
   "compilerOptions": {
+    "module": "ES6",
     "target": "es2018",
-    "lib": ["es2018", "dom"],
     "allowJs": true,
-    "checkJs": true,
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
     "strict": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "skipLibCheck": true
   },
-  "include": ["./src/**/*", "./tests/**/*"],
-  "exclude": ["../lib0/**/*", "node_modules/**/*", "dist", "dist/**/*.js"]
+  "include": [
+    "./src/**/*",
+    "./tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
