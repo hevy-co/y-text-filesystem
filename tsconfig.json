@@ -2,12 +2,11 @@
   "compilerOptions": {
     "module": "ES6",
     "target": "es2018",
-    "allowJs": true,
     "strict": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "outDir": "./dist",
-    "skipLibCheck": true
+    "outDir": "./dist"
+    //"skipLibCheck": true
   },
   "include": [
     "./src/**/*",
