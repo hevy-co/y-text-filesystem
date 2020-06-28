@@ -1,5 +1,4 @@
 import * as Y from 'yjs'
-import * as idb from 'lib0/indexeddb.js'
 import * as mutex from 'lib0/mutex.js'
 import { Observable } from 'lib0/observable.js'
 
@@ -15,15 +14,15 @@ export const fetchUpdates = (fsPersistence: FilesystemPersistence) => {
   if (!fsPersistence.db) {
     throw new Error("fsPersistence should not be null")
   }
-  const [updatesStore] = idb.transact(/** @type {any} */(fsPersistence.db), [updatesStoreName]) // , 'readonly')
-  return idb.getAll(updatesStore, idb.createIDBKeyRangeLowerBound(fsPersistence._dbref, false)).then(updates =>
-    fsPersistence._mux(() =>
-      updates.forEach(val => Y.applyUpdate(fsPersistence.doc, val))
-    )
-  )
-    .then(() => idb.getLastKey(updatesStore).then(lastKey => { fsPersistence._dbref = lastKey + 1 }))
-    .then(() => idb.count(updatesStore).then(cnt => { fsPersistence._dbsize = cnt }))
-    .then(() => updatesStore)
+  //const [updatesStore] = idb.transact(/** @type {any} */(fsPersistence.db), [updatesStoreName]) // , 'readonly')
+  //return idb.getAll(updatesStore, idb.createIDBKeyRangeLowerBound(fsPersistence._dbref, false)).then(updates =>
+  //  fsPersistence._mux(() =>
+  //    updates.forEach(val => Y.applyUpdate(fsPersistence.doc, val))
+  //  )
+  //)
+  //  .then(() => idb.getLastKey(updatesStore).then(lastKey => { fsPersistence._dbref = lastKey + 1 }))
+  //  .then(() => idb.count(updatesStore).then(cnt => { fsPersistence._dbsize = cnt }))
+  //  .then(() => updatesStore)
 }
 
 /**
@@ -32,13 +31,13 @@ export const fetchUpdates = (fsPersistence: FilesystemPersistence) => {
  */
 export const storeState = (fsPersistence: FilesystemPersistence, forceStore: boolean = true) =>
   fetchUpdates(fsPersistence)
-    .then(updatesStore => {
-      if (forceStore || fsPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
-        idb.addAutoKey(updatesStore, Y.encodeStateAsUpdate(fsPersistence.doc))
-          .then(() => idb.del(updatesStore, idb.createIDBKeyRangeUpperBound(fsPersistence._dbref, true)))
-          .then(() => idb.count(updatesStore).then(cnt => { fsPersistence._dbsize = cnt }))
-      }
-    })
+//.then(updatesStore => {
+//  if (forceStore || fsPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
+//    idb.addAutoKey(updatesStore, Y.encodeStateAsUpdate(fsPersistence.doc))
+//      .then(() => idb.del(updatesStore, idb.createIDBKeyRangeUpperBound(fsPersistence._dbref, true)))
+//      .then(() => idb.count(updatesStore).then(cnt => { fsPersistence._dbsize = cnt }))
+//  }
+//})
 
 /**
  * @param {string} name
@@ -54,7 +53,6 @@ export class FilesystemPersistence extends Observable<any> {
   _mux: mutex.mutex
   _dbref: number
   _dbsize: number
-  _db: Promise<any>
   db: any
   synced: boolean
   whenSynced: any
@@ -78,24 +76,21 @@ export class FilesystemPersistence extends Observable<any> {
      */
     this.db = null
     this.synced = false
-    this._db = idb.openDB(name, db =>
-      idb.createStores(db, [
-        ['updates', { autoIncrement: true }],
-        ['custom']
-      ])
-    )
     /**
      * @type {Promise<FilesystemPersistence>}
      */
-    this.whenSynced = this._db.then((db: any) => {
-      this.db = db
+    this.whenSynced = async () => {
       const currState = Y.encodeStateAsUpdate(doc)
-      return fetchUpdates(this).then(updatesStore => idb.addAutoKey(updatesStore, currState)).then(() => {
-        this.emit('synced', [this])
-        this.synced = true
-        return this
-      })
-    })
+    }
+    //this.whenSynced = this._db.then((db: any) => {
+    //  this.db = db
+    //  const currState = Y.encodeStateAsUpdate(doc)
+    //  //return fetchUpdates(this).then(updatesStore => idb.addAutoKey(updatesStore, currState)).then(() => {
+    //  //  this.emit('synced', [this])
+    //  //  this.synced = true
+    //  //  return this
+    //  //})
+    //})
     /**
      * Timeout in ms untill data is merged and persisted in idb.
      */
@@ -108,23 +103,23 @@ export class FilesystemPersistence extends Observable<any> {
      * @param {Uint8Array} update
      */
     this._storeUpdate = (update: Uint8Array) =>
-      this._mux(() => {
-        if (this.db) {
-          const [updatesStore] = idb.transact(/** @type {any} */(this.db), [updatesStoreName])
-          idb.addAutoKey(updatesStore, update)
-          if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
-            // debounce store call
-            if (this._storeTimeoutId !== null) {
-              clearTimeout(this._storeTimeoutId)
-            }
-            this._storeTimeoutId = setTimeout(() => {
-              storeState(this, false)
-              this._storeTimeoutId = null
-            }, this._storeTimeout)
-          }
-        }
-      })
-    doc.on('update', this._storeUpdate)
+      //this._mux(() => {
+      //  if (this.db) {
+      //    const [updatesStore] = idb.transact(/** @type {any} */(this.db), [updatesStoreName])
+      //    idb.addAutoKey(updatesStore, update)
+      //    if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
+      //      // debounce store call
+      //      if (this._storeTimeoutId !== null) {
+      //        clearTimeout(this._storeTimeoutId)
+      //      }
+      //      this._storeTimeoutId = setTimeout(() => {
+      //        storeState(this, false)
+      //        this._storeTimeoutId = null
+      //      }, this._storeTimeout)
+      //    }
+      //  }
+      //})
+      doc.on('update', this._storeUpdate)
   }
 
   destroy() {
@@ -132,18 +127,18 @@ export class FilesystemPersistence extends Observable<any> {
       clearTimeout(this._storeTimeoutId)
     }
     this.doc.off('update', this._storeUpdate)
-    return this._db.then(db => {
-      db.close()
-    })
+    //return this._db.then(db => {
+    //  db.close()
+    //})
   }
 
   /**
    * Destroys this instance and removes all data from indexeddb.
    */
   clearData() {
-    this.destroy().then(() => {
-      idb.deleteDB(this.name)
-    })
+    //this.destroy().then(() => {
+    //  //idb.deleteDB(this.name)
+    //})
   }
 
   /**
@@ -151,10 +146,11 @@ export class FilesystemPersistence extends Observable<any> {
    * @return {Promise<String | number | ArrayBuffer | Date | any>}
    */
   get(key: string | number | ArrayBuffer | Date): Promise<string | number | ArrayBuffer | Date | any> {
-    return this._db.then(db => {
-      const [custom] = idb.transact(db, [customStoreName], 'readonly')
-      return idb.get(custom, key)
-    })
+    return new Promise(() => { })
+    //return this._db.then(db => {
+    //  const [custom] = idb.transact(db, [customStoreName], 'readonly')
+    //  return idb.get(custom, key)
+    //})
   }
 
   /**
@@ -163,10 +159,11 @@ export class FilesystemPersistence extends Observable<any> {
    * @return {Promise<String | number | ArrayBuffer | Date>}
    */
   set(key: string | number | ArrayBuffer | Date, value: string | number | ArrayBuffer | Date): Promise<string | number | ArrayBuffer | Date> {
-    return this._db.then(db => {
-      const [custom] = idb.transact(db, [customStoreName])
-      return idb.put(custom, key, value)
-    })
+    return new Promise(() => { })
+    //return this._db.then(db => {
+    //  const [custom] = idb.transact(db, [customStoreName])
+    //  return idb.put(custom, key, value)
+    //})
   }
 
   /**
@@ -174,9 +171,11 @@ export class FilesystemPersistence extends Observable<any> {
    * @return {Promise<undefined>}
    */
   del(key: string | number | ArrayBuffer | Date): Promise<undefined> {
-    return this._db.then(db => {
-      const [custom] = idb.transact(db, [customStoreName])
-      return idb.del(custom, key)
-    })
+    return new Promise(() => { })
+    //return this._db.then(db => {
+    //  const [custom] = idb.transact(db, [customStoreName])
+    //  return idb.del(custom, key)
+    //return undefined
+    //})
   }
 }
