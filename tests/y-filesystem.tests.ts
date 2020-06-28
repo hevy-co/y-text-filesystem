@@ -1,5 +1,6 @@
 import * as chai from 'chai'
-import * as Y from 'yjs'
+//@ts-ignore
+import { default as Y } from 'yjs'
 import { FilesystemPersistence, clearDocument, PREFERRED_TRIM_SIZE, fetchUpdates } from '../src/y-filesystem.js'
 import * as promise from 'lib0/promise.js'
 
