@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Filesystem database adapter for Yjs",
   "type": "module",
-  "main": "./src/y-filesystem.js",
-  "module": "./src/y-filesystem.js",
+  "main": "./dist/src/y-filesystem.js",
+  "module": "./dist/src/y-filesystem.js",
   "types": "./dist/src/y-filesystem.d.ts",
   "sideEffects": false,
   "scripts": {
@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yjs/y-indexeddb.git"
+    "url": "git+https://github.com/hevy-co/y-filesystem.git"
   },
   "keywords": [
     "Yjs",
