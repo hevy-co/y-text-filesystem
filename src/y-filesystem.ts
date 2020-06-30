@@ -1,4 +1,5 @@
-import * as Y from 'yjs'
+// @ts-ignore
+import { default as Y } from 'yjs'
 import * as mutex from 'lib0/mutex.js'
 import { Observable } from 'lib0/observable.js'
 
@@ -29,8 +30,9 @@ export const fetchUpdates = (fsPersistence: FilesystemPersistence) => {
  * @param {FilesystemPersistence} fsPersistence
  * @param {boolean} forceStore
  */
-export const storeState = (fsPersistence: FilesystemPersistence, forceStore: boolean = true) =>
+export const storeState = (fsPersistence: FilesystemPersistence, forceStore: boolean = true) => {
   fetchUpdates(fsPersistence)
+}
 //.then(updatesStore => {
 //  if (forceStore || fsPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
 //    idb.addAutoKey(updatesStore, Y.encodeStateAsUpdate(fsPersistence.doc))
@@ -58,7 +60,7 @@ export class FilesystemPersistence extends Observable<any> {
   whenSynced: any
   _storeTimeout: number
   _storeTimeoutId: NodeJS.Timeout | null
-  _storeUpdate: (update: Uint8Array) => any
+  _storeUpdate: (update: Uint8Array, origin: any, doc: Y.Doc) => any
 
   /**
    * @param {string} name
@@ -71,9 +73,6 @@ export class FilesystemPersistence extends Observable<any> {
     this._mux = mutex.createMutex()
     this._dbref = 0
     this._dbsize = 0
-    /**
-     * @type {any|null}
-     */
     this.db = null
     this.synced = false
     /**
@@ -95,31 +94,34 @@ export class FilesystemPersistence extends Observable<any> {
      * Timeout in ms untill data is merged and persisted in idb.
      */
     this._storeTimeout = 1000
-    /**
-     * @type {any}
-     */
+
     this._storeTimeoutId = null
-    /**
-     * @param {Uint8Array} update
-     */
-    this._storeUpdate = (update: Uint8Array) =>
-      //this._mux(() => {
-      //  if (this.db) {
-      //    const [updatesStore] = idb.transact(/** @type {any} */(this.db), [updatesStoreName])
-      //    idb.addAutoKey(updatesStore, update)
-      //    if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
-      //      // debounce store call
-      //      if (this._storeTimeoutId !== null) {
-      //        clearTimeout(this._storeTimeoutId)
-      //      }
-      //      this._storeTimeoutId = setTimeout(() => {
-      //        storeState(this, false)
-      //        this._storeTimeoutId = null
-      //      }, this._storeTimeout)
-      //    }
-      //  }
-      //})
-      doc.on('update', this._storeUpdate)
+
+    this._storeUpdate = (update: Uint8Array, origin: any, doc: Y.Doc) => {
+      console.log('-----')
+      console.log(doc)
+      console.log('-----')
+      Y.applyUpdate(this.doc, update)
+      let text = doc.getText('text').toString()
+      console.log(text)
+    }
+    //this._mux(() => {
+    //  if (this.db) {
+    //    const [updatesStore] = idb.transact(/** @type {any} */(this.db), [updatesStoreName])
+    //    idb.addAutoKey(updatesStore, update)
+    //    if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
+    //      // debounce store call
+    //      if (this._storeTimeoutId !== null) {
+    //        clearTimeout(this._storeTimeoutId)
+    //      }
+    //      this._storeTimeoutId = setTimeout(() => {
+    //        storeState(this, false)
+    //        this._storeTimeoutId = null
+    //      }, this._storeTimeout)
+    //    }
+    //  }
+    //})
+    doc.on('update', this._storeUpdate)
   }
 
   destroy() {
