@@ -2,7 +2,7 @@
 import { default as Y } from 'yjs'
 import * as mutex from 'lib0/mutex.js'
 import { Observable } from 'lib0/observable.js'
-import { writeFileSync } from 'fs'
+import { writeFile } from 'fs/promises'
 
 const customStoreName = 'custom'
 const updatesStoreName = 'updates'
@@ -98,13 +98,13 @@ export class FilesystemPersistence extends Observable<any> {
 
     this._storeTimeoutId = null
 
-    this._storeUpdate = (update: Uint8Array, origin: any, doc: Y.Doc) => {
+    this._storeUpdate = async (update: Uint8Array, origin: any, doc: Y.Doc) => {
       Y.applyUpdate(this.doc, update)
       for (let share of this.doc.share.entries()) {
         let name = share[0]
         console.log(name)
         let ytext = doc.getText(name).toString()
-        writeFileSync(name, ytext)
+        await writeFile(name, ytext)
       }
       //console.log(ytext)
     }

@@ -2,18 +2,23 @@ import * as chai from 'chai'
 //@ts-ignore
 import { default as Y } from 'yjs'
 import { FilesystemPersistence, clearDocument, PREFERRED_TRIM_SIZE, fetchUpdates } from '../src/y-filesystem.js'
-import * as promise from 'lib0/promise.js'
+import { readFile } from 'fs/promises'
+let expect = chai.expect
 
 describe('Filesystem Persistence', async () => {
-  it('Works', async () => {
+  it('can persist a file', async () => {
     let docName = 'testdoc'
     await clearDocument(docName)
     let doc1 = new Y.Doc()
     let persist = new FilesystemPersistence(docName, doc1)
-    let txt = doc1.getText('text')
+    let filename = 'tests/out/somedoc.js'
+    let txt = doc1.getText(filename)
     txt.insert(0, 'abc')
-    //txt.insert(2, 'xyz')
-    //txt.insert(0, '123')
+    txt.insert(2, 'xyz')
+    txt.insert(0, '123')
+    let expected = '123abxyzc'
+    let actual = await readFile(filename, { encoding: 'utf8' })
+    expect(actual).to.be.equal(expected, "persisted file contents are incorrect")
   })
 
   /*
