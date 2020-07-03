@@ -102,7 +102,6 @@ export class FilesystemPersistence extends Observable<any> {
       Y.applyUpdate(this.doc, update)
       for (let share of this.doc.share.entries()) {
         let name = share[0]
-        console.log(name)
         let ytext = doc.getText(name).toString()
         await writeFile(name, ytext)
       }

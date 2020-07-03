@@ -11,4 +11,4 @@ clean:
 
 test: build
 	@mkdir -p $(TEST_OUT)
-	npx mocha --trace-warnings $(DIST)/tests/y-filesystem.tests.js
+	npx ava $(DIST)/tests/y-filesystem.tests.js
