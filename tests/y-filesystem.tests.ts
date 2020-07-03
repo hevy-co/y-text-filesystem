@@ -12,8 +12,8 @@ describe('Filesystem Persistence', async () => {
     let persist = new FilesystemPersistence(docName, doc1)
     let txt = doc1.getText('text')
     txt.insert(0, 'abc')
-    txt.insert(2, 'xyz')
-    txt.insert(0, '123')
+    //txt.insert(2, 'xyz')
+    //txt.insert(0, '123')
   })
 
   /*
