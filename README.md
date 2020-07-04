@@ -1,15 +1,25 @@
-# Filesystem persistence adapter for [Yjs](https://github.com/y-js/yjs)
+# Filesystem Persistence Adapter for [Yjs](https://github.com/y-js/yjs)
 
-Use the filesystem adapter to persist data on a local filesystem.
+Persist Yjs text documents to the filesystem. Only text document types are supported.
 
-Install this with `npm` or `yarn`.
+## Installation
+Install with `npm` or `yarn`.
 
 ```sh
 yarn add y-filesystem
 ```
 
-## License
+## Usage
 
-Yjs is licensed under the [MIT License](./LICENSE).
+Attach a `FilesystemPersistance` to a `Y.Doc` and it will be written to disk using the string passed into `getText()` as the filename.
+For example:
 
-<kevin.jahns@protonmail.com>
+```typescript
+  let doc = new Y.Doc()
+  let persist = new FilesystemPersistence(doc)
+  let filename = 'src/somedoc.js'
+  let txt = doc.getText(filename)
+  txt.insert(0, 'text data from the user')
+```
+
+At this point, the file `src/somedoc.js` contains 'text data from the user'.
