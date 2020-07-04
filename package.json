@@ -1,11 +1,10 @@
 {
-  "name": "y-filesystem",
-  "version": "1.0.0",
-  "description": "Filesystem database adapter for Yjs",
+  "name": "y-text-filesystem",
+  "version": "0.1.0",
+  "description": "Filesystem adapter for YJS, for text documents only",
   "type": "module",
   "main": "./dist/src/y-filesystem.js",
   "module": "./dist/src/y-filesystem.js",
-  "types": "./dist/src/y-filesystem.d.ts",
   "sideEffects": false,
   "files": [
     "dist/*",
@@ -13,22 +12,17 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hevy-co/y-filesystem.git"
+    "url": "git+https://github.com/hevy-co/y-text-filesystem.git"
   },
   "keywords": [
-    "Yjs",
-    "CRDT",
-    "offline",
-    "shared editing",
-    "collaboration",
-    "concurrency"
+    "YJS",
+    "CRDT"
   ],
   "author": "Matthew Olenik <matt@hevy.co>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hevy-co/y-filesystem/issues"
+    "url": "https://github.com/hevy-co/y-text-filesystem/issues"
   },
-  "homepage": "https://yjs.dev",
   "dependencies": {
     "lib0": "^0.2.30",
     "node": "^14.4.0",
