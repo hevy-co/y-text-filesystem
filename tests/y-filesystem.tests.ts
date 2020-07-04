@@ -1,14 +1,12 @@
 import test from 'ava'
 //@ts-ignore
 import { default as Y } from 'yjs'
-import { FilesystemPersistence, clearDocument, PREFERRED_TRIM_SIZE, fetchUpdates } from '../src/y-filesystem.js'
+import { FilesystemPersistence } from '../src/y-filesystem.js'
 import { readFile } from 'fs/promises'
 
 test('can persist a file', async t => {
-  let docName = 'testdoc'
-  await clearDocument(docName)
   let doc1 = new Y.Doc()
-  let persist = new FilesystemPersistence(docName, doc1)
+  let persist = new FilesystemPersistence(doc1)
   let filename = 'tests/out/somedoc.js'
   let txt = doc1.getText(filename)
   txt.insert(0, 'abc')
